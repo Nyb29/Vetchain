@@ -1,0 +1,460 @@
+/**
+ * New script file
+ */
+
+const ns = 'org.vetchain.network' // costant variable storing vetchain network
+/*
+* @param{org.vetchain.network.init} no params
+* @transaction
+*/
+async function init(){ 
+//initialization function that will populate with the participants and the commodity 
+
+  let VetId = '0001' 
+  // vet ID 
+  let Clinic = 'unique clinic' 
+  //Clinic name
+  let VetAddress = 'London' 
+  // vet address
+  let listOfVaccines = ['Rabies','Distemper','Hepatitis','Bordetella'] 
+  //array storing vaccinations that will be provided by the vet
+  let VetReg =  await getParticipantRegistry(ns+'.Vet') 
+  // getting Vet structure in the cto
+  let factory = getFactory() 
+  //variable storing built-in function
+  let NewVet = factory.newResource(ns,'Vet',VetId) 
+  // creating the vet 
+  //allocating vet info in the variables
+  NewVet.Clinic = Clinic 
+  NewVet.Address =VetAddress 
+  NewVet.listOfVaccines = listOfVaccines
+  await VetReg.add(NewVet) 
+  //adding vet to the chain using await to make sure that all the info are there at the time of adding them 
+  ///////////////////////////////////////////////////////////
+    
+  let LawId = '0002' 
+  // law ID
+  let Station = 'unique Station' 
+  // law station name  
+  let LawAddress = 'London' 
+  // law address
+
+  let LawReg =  await getParticipantRegistry(ns+'.Law') 
+  // getting law structure in the cto
+  
+  let NewLaw = factory.newResource(ns,'Law',LawId) 
+  //creating the law
+  // allocating law info in the variables
+  NewLaw.Station = Station 
+  NewLaw.Address = LawAddress
+  await LawReg.add(NewLaw)  
+  //adding law to the chain using await to make sure that all the info are there at the time of adding them 
+  
+  ///////////////////////////////////////////////////////////
+  
+  let InsuranceId = '0003' 
+  // insurance ID
+  let branch = 'unique insurance' 
+  // branch name
+  let insAddress = 'London' 
+  // insurance address
+  let InsuranceReg =  await getParticipantRegistry(ns+'.Insurance') 
+  // getting insurance structure in the cto
+  
+  let NewInsurance = factory.newResource(ns,'Insurance',InsuranceId) 
+  // creating insurance 
+  // allocating insurance info in the variables
+  NewInsurance.branch = branch 
+  NewInsurance.Address = insAddress
+  await InsuranceReg.add(NewInsurance)  
+  //adding insurance to the chain using await to make sure that all the info are there at the time of adding them
+  
+  
+  
+    
+  ///////////////////////////////////////////////////////////
+  
+  let OwnerId= ['1001', '2001', '3001','4001'] 
+  // array storing owners id
+  let FirstName = ['Fabio', 'Calvin', 'Mohamed','Dog'] 
+  // array storing owners first names
+  let LastName = ['Tali', 'Morris', 'Sheriff','Pound'] 
+  // array storing owners last names
+  let OwnerAddress = ['South London','West London ','East London','Central London'] 
+  // array storing owners addresses
+  let DOB = [new Date(1992,02,10),new Date(1996,02,10),new Date(1995,42,10),new Date(1960,01,01)] 
+  // array storing owners dates of births
+  ////////////////////////////////////////////////////////////
+  
+  let dogID = ['01', '02', '03','04'] 
+  // array storing dog's id
+  let dogsowner= ['4001', '4001', '4001','4001'] 
+  // array storing dog's owners. the dogs are in the dog pound for demontration pourpose 
+  let Dogsdescription = ['dogsandro', 'cabdog','valdondog','giorcane'] 
+  // dogs names 
+  
+  ////////////////////////////////////////////////////////////
+  let ownerReg = await getParticipantRegistry(ns+'.Owner') 
+  // obtaining owner sructure from cto and storing in the variable "ownerReg"
+  
+  let ownerArray = new Array() 
+  // owner array used to store owners info
+  let dogsArray = new Array() 
+  // dogs array used to store dogs info
+  ////////////////////////////////////////////////////////////
+  
+  
+  
+  //populating the blockchain with the owners looping on each element of the arrays containing the owners data
+   OwnerId.forEach(  (x,i)=>{
+    // storing a built in function in the variable 'factory' avoinding problems during the execution 
+    let factory = getFactory()
+    //obtaining the owner passing along the looped data stored in 'x'
+   	let newOwner = factory.newResource(ns, 'Owner', x) 
+    
+   	//populating the 'x' places with the data contained in 'i'
+    newOwner.FirstName = FirstName[i]
+    newOwner.LastName = LastName[i]
+    newOwner.Address = OwnerAddress[i]
+    newOwner.DOB = DOB[i]
+     
+    //adding the all the owners tothe array storing the new owners
+    ownerArray.push(newOwner)
+  })
+  	//adding all the owners to the blockain 
+    await ownerReg.addAll(ownerArray)
+  
+  ///////////////////////////////////////////////////////////
+
+  //this for each works like the owners for each
+  	 dogID.forEach(  (x,i)=>{
+       
+    let factory = getFactory()
+   	let newdog = factory.newResource(ns, 'Dog', x);
+    let ownerrelationship = factory.newRelationship(ns,'Owner',dogsowner[i]);
+    newdog.owner = ownerrelationship;  
+    newdog.description=Dogsdescription[i];
+    dogsArray.push(newdog);
+       
+  })
+let dogreg = await getAssetRegistry(ns+'.Dog')
+await dogreg.addAll(dogsArray)
+}
+
+
+/*
+* @param{org.vetchain.network.Own} new owner
+* @transaction
+*/
+
+
+
+async function Own(dw){
+  //function  to trade dogs
+ //getting owner info
+	let OwnerReg = await getParticipantRegistry(ns+'.Owner');
+  
+  //Check if the DogsOwner exist
+  	let buyerExist = await OwnerReg.exists(dw.newOwner.getIdentifier());
+  	if (buyerExist){
+      // passing the dog to the new owner
+      dw.dog.owner=dw.newOwner;
+      //variable storing dog's data 
+      let dog = await getAssetRegistry(ns+'.Dog');
+      //updating commodity
+      await dog.update(dw.dog);
+    }else
+      throw new Error('buyer does not exist');
+}
+
+
+ ///////////////////////////////////////////////////////////
+
+/*
+* @param{org.vetchain.network.Registrationofownership} ro
+* @transaction
+*/
+   
+
+async function Registrationofownership(ro){
+  // function to assign microchipID
+  //getting dog's info
+	let DogReg= await getAssetRegistry(ns+'.Dog');
+  //variable storing date
+  	let Mchipdate = new Date()
+    //creating variable to prove dog existance
+    let dogExist = await DogReg.exists(ro.dog.getIdentifier());
+  //method used to provide rondom number 
+ 	let max = 100
+    let MchipId = Math.floor(Math.random() * max).toString()
+ 
+  	
+  	 if (dogExist){
+       //updating status of dog providing microchip number  which is composed with random number + owner ID
+     	 ro.dog.MicrochipId=MchipId + ro.dog.getIdentifier();
+       //adding date of of ownership 
+      	 ro.dog.Mchipdate=Mchipdate ;
+     
+     //updating dog registry 
+       await DogReg.update(ro.dog);
+      
+    }else
+      throw new Error('dog does not exist');
+}
+  
+///////////////////////////////////////////////////////////////////
+
+ /*
+* @param{org.vetchain.network.getVaccination} va 
+* @transaction
+*/
+
+  
+async function getVaccination(va){
+  //function to provide  vaccinations
+  // obtaining dog and Vet registry 
+  let DogReg= await getAssetRegistry(ns+'.Dog');
+  let VetReg = await getParticipantRegistry(ns+'.Vet');
+  
+  // creating variable to be used in the statement that will prove existance of participant and asset
+  let DogExist = await DogReg.exists(va.dog.getIdentifier());
+  let VetExist = await VetReg.exists(va.vet.getIdentifier());
+  if(VetExist && DogExist){
+    //vaiable storing vaccines contained in the array in the CTO
+ 	let VaccinationList = va.vet.listOfVaccines;
+    //varibale storing date
+  	let Vaccinedate = new Date()
+    // variable containing updated info about vaccines and date 
+    va.dog.ListVaccinationCompleted = VaccinationList;
+    va.dog.Vaccinedate= Vaccinedate;
+    //updating the dog
+    await DogReg.update(va.dog)
+  
+  }
+      else
+      throw new Error('dog or Vet do not exist');
+}
+  
+
+ /*
+* @param{org.vetchain.network.DogIsInsured} Insu
+* @transaction
+*/
+
+
+  async function DogIsInsured(Insu){
+    // function to assign status of insured 
+   //obtaining dog and insurance registry 
+    let DogReg= await getAssetRegistry(ns+'.Dog');
+   	let InsReg= await getParticipantRegistry(ns+'.Insurance');
+    
+    // creating variable to be used in the statement that will prove existance of participant and asset
+    let DogExist = await DogReg.exists(Insu.dog.getIdentifier());
+  	let InsExist = await InsReg.exists(Insu.dInsurance.getIdentifier());
+    
+if(InsExist && DogExist){
+  //using boolean True to set insured status
+  //variable storing vaule 'true'
+ 	let IsInsured = true;
+  //variable storing date of insurance
+  	let InsuranceDate = new Date()
+  // variable storing status and date related to the cto stucture   
+    Insu.dog.isInsured = IsInsured;
+    Insu.dog.InsuranceDate= InsuranceDate;
+  //updating dogs info and status
+    await DogReg.update(Insu.dog)
+  
+  }
+      else
+      throw new Error('dog or insurance do not exist');
+}
+
+
+
+ /*
+* @param{org.vetchain.network.isLost} st
+* @transaction
+*/
+
+
+  async function isLost(st){
+    //function to set dog status to lost
+   //obtaining dog and Law registry 
+    let DogReg= await getAssetRegistry(ns+'.Dog');
+   	let LawReg= await getParticipantRegistry(ns+'.Law');
+    
+     // creating variable to be used in the statement that will prove existance of participant and asset
+    let DogExist = await DogReg.exists(st.dog.getIdentifier());
+  	let Lawexist = await LawReg.exists(st.LawOffice.getIdentifier());
+    //checking existance 
+if(Lawexist && DogExist){
+    //using boolean to set status to lost
+    // variable storing value true
+    let IsLost = true;
+  //variable storing date of declaration 
+  	let LostDate = new Date()
+    
+    // variable storing status and date related to the cto stucture   
+    st.dog.isLost = IsLost;
+    st.dog.LostDate= LostDate;
+  //updating dog
+    await DogReg.update(st.dog)
+  
+  }
+      else
+      throw new Error('dog or Lawd do not exist');
+}
+
+ /*
+* @param{org.vetchain.network.isFound} st
+* @transaction
+*/
+
+  async function isFound(st){     
+//this function is used to erase the status @lost. It will set the values to null 
+    let DogReg= await getAssetRegistry(ns+'.Dog');
+   	let LawReg= await getParticipantRegistry(ns+'.Law');
+    let DogExist = await DogReg.exists(st.dog.getIdentifier());
+  	let Lawexist = await LawReg.exists(st.LawOffice.getIdentifier());
+if(Lawexist && DogExist){
+ 	let IsLost = null;
+    
+    st.dog.isLost = IsLost;
+    st.dog.LostDate= null;
+  //updating dog
+    await DogReg.update(st.dog)
+  }
+      else
+      throw new Error('dog or Lawd do not exist');
+}
+   
+ /*
+* @param{org.vetchain.network.dogIsDead} dd
+* @transaction
+*/
+
+
+async function dogIsDead(dd){
+  //function setting status of the dog to dead
+   //obtainig dog and vet registry
+    let DogReg= await getAssetRegistry(ns+'.Dog');
+   	let VetReg= await getParticipantRegistry(ns+'.Vet');
+  
+   // creating variable to be used in the statement that will prove existance of participant and asset
+    let DogExist = await DogReg.exists(dd.dog.getIdentifier());
+  	let VetExist = await VetReg.exists(dd.VetClinic.getIdentifier());
+//checking with the statement if they exist
+if(VetExist && DogExist){
+  //setting status to dead using boolean
+  //variable storing value true that represent death
+ 	let IsDead = true;
+  //variable storing date of death
+  	let dateOfDeath = new Date()
+    // variable storing status and date related to the cto stucture   
+    dd.dog.isDead = IsDead;
+    dd.dog.dateOfDeath= dateOfDeath;
+  //updatign the dog status
+    await DogReg.update(dd.dog)
+  
+  }
+      else
+      throw new Error('dog or Vet do not exist');
+}
+
+
+ /*
+* @param{org.vetchain.network.queryOwners} o
+* @transaction
+*/
+
+
+async function queryOwners(o){
+  //query to check owners dynamically 
+  let ownerID = o.owner.OwnerId;
+  let queryResult = await query('Owners', {oID: ownerID });
+  if(queryResult.length>0){
+     queryResult.forEach(item=>console.log(item))
+  } else 
+    throw new Error('no result');
+}
+
+
+///////////////////////////////////////////////////////
+
+ /*
+* @param{org.vetchain.network.OwnerIsDeath} od
+* @transaction
+*/
+
+
+async function OwnerIsDeath(od){
+  //function that set the owners status to dead and assign the dog to the dog pound 
+  //variable storing the owner data
+  let ownerID = od.owner.OwnerId;
+  //variable storing query and json format od the owner to do the check in the 'WHERE' part of the query
+  let queryResult = await query('Owners', {oID: ownerID });
+  //if statement to check if the query is successful 
+  if(queryResult.length>0){
+    //printing the data in the console
+     queryResult.forEach(item=>console.log(item))
+  } else 
+    throw new Error('no result');
+  
+  //obtaining registry  
+    let OwnerReg= await getParticipantRegistry(ns+'.Owner');
+    let DogReg= await getAssetRegistry(ns+'.Dog');
+   //variable to be used in the if statement to check existance of the owner
+  	let OwnerExist = await OwnerReg.exists(od.owner.getIdentifier());
+  //array storing dogs id 
+    let dogID = ['01', '02', '03','04'];
+  
+// if statement to check owner 
+if(OwnerExist & queryResult.length>0){
+  
+  //variable storing boolean true to set status of the owner to dead
+ 	let IsDead = true;
+  //variable storing date of death 
+  	let DayOfDeath = new Date();
+  //variable storing dog pund to set the new owner of the dogs  
+    let newOwner = await OwnerReg.get('4001');
+   // variable storing status and date related to the cto stucture  
+    od.owner.isDead = IsDead;
+    od.owner.DayOfDeath= DayOfDeath;
+//updating owner 
+    await OwnerReg.update(od.owner);
+  //variable to be used later 
+  	let dogToUpdate = null;
+  //element to loop to obtain dogs id
+  	let allDogs = await DogReg.getAll(); 
+  	//console.log(allDogs);
+
+  	allDogs.forEach(  (dog,i)=>{
+
+        console.log(od.owner.OwnerId)
+      // id owner in the dog Reg
+        console.log(dog.owner.getIdentifier().toString()) // id owner in the dog Reg
+      //if statement to check the owner 
+       if(dog.owner.getIdentifier().toString() === od.owner.OwnerId ){ 
+         //assining to dog pound the dogs that belonged to the dead owner
+           dog.owner= newOwner;
+           dogToUpdate = dog; 
+       	   console.log(dogToUpdate);
+       }
+    	
+    }
+                )
+ 
+ 	if( dogToUpdate != null){
+        //checking the dog so that it can be updated
+      //updating the dog
+      	await DogReg.update(dogToUpdate);
+            
+  }
+  else 
+    throw new Error('dog did not update or not found');
+  
+     
+}
+ else
+      throw new Error('dog or owner do not exist');
+}
