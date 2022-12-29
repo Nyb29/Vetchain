@@ -1,0 +1,196 @@
+rule Ownercanseetheirdogs {
+   	description: "Owner can see their dogs and dog pound dogs"
+    participant(o): "org.vetchain.network.Owner"
+    operation: ALL
+    resource(d): "org.vetchain.network.Dog"
+  	condition: (d.owner.getIdentifier()== o.getIdentifier() || d.owner.getIdentifier() === '4001')
+    action: ALLOW
+}
+rule OwnerCanGetVaccinesForDog{
+  description: "Vet can see dogs"
+  participant(t): "org.vetchain.network.Owner"
+  operation: ALL
+  resource(v): "org.vetchain.network.getVaccination"
+  transaction: "org.vetchain.network.getVaccination"
+  condition: (t.getIdentifier())
+  action: ALLOW
+}
+
+
+
+rule DogCanDie {
+  description: "Owner can set the dog status to lost "
+  participant(t): "org.vetchain.network.Vet"
+  operation: ALL
+  resource(v): "org.vetchain.network.dogIsDead"
+  transaction: "org.vetchain.network.dogIsDead"
+  condition: (t.getIdentifier())
+  action: ALLOW
+}
+
+
+rule VetCanSeeItself {
+  description: "Vet can see itself"
+  participant(t): "org.vetchain.network.Vet"
+  operation: ALL
+  resource(v): "org.vetchain.network.Vet"
+  condition: (t.getIdentifier()== v.getIdentifier())
+  action: ALLOW
+}
+
+rule OwnerCanDocumentOwnership {
+  description: "dogs can be insured "
+  participant(t): "org.vetchain.network.Owner"
+  operation: ALL
+  resource(v): "org.vetchain.network.Registrationofownership"
+  transaction: "org.vetchain.network.Registrationofownership"
+  condition: (t.getIdentifier())
+  action: ALLOW
+}
+
+rule OwnerCanInsureDogs {
+  description: "dogs can be insured "
+  participant(t): "org.vetchain.network.Owner"
+  operation: ALL
+  resource(v): "org.vetchain.network.DogIsInsured"
+  transaction: "org.vetchain.network.DogIsInsured"
+  condition: (t.getIdentifier())
+  action: ALLOW
+}
+rule OwnerCanDeclareDeathOfDog {
+  description: "dogs can be declared dead"
+  participant(t): "org.vetchain.network.Owner"
+  operation: ALL
+  resource(v): "org.vetchain.network.dogIsDead"
+  transaction: "org.vetchain.network.dogIsDead"
+  condition: (t.getIdentifier())
+  action: ALLOW
+}
+
+rule InsuranceCanSeeItself {
+  description: "Insurance can see dogs "
+  participant(t): "org.vetchain.network.Insurance"
+  operation: ALL
+  resource(v): "org.vetchain.network.Insurance"
+  condition: (t.getIdentifier()== v.getIdentifier())
+  action: ALLOW
+}
+
+rule LawCanItself {
+  description: "Law can see dogs"
+  participant(t): "org.vetchain.network.Law"
+  operation: READ
+  resource(v): "org.vetchain.network.Law"
+  condition: (t.getIdentifier()== v.getIdentifier())
+  action: ALLOW
+}
+
+rule CanBeLost {
+  description: "Owner can set the dog status to lost "
+  participant(t): "org.vetchain.network.Owner"
+  operation: ALL
+  resource(v): "org.vetchain.network.isLost"
+  transaction: "org.vetchain.network.isLost"
+  condition: (t.getIdentifier())
+  action: ALLOW
+}
+rule CanBeFound {
+  description: "Owner can set the dog status to Found  "
+  participant(t): "org.vetchain.network.Owner"
+  operation: ALL
+  resource(v): "org.vetchain.network.isFound"
+  transaction: "org.vetchain.network.isFound"
+  condition: (t.getIdentifier())
+  action: ALLOW
+}
+
+rule allowOwn {
+   	description: "Owner can trade dogs"
+    participant(o): "org.vetchain.network.Owner"
+    operation: ALL
+    resource(d): "org.vetchain.network.Own"
+  	transaction: "org.vetchain.network.Own"
+  	condition: (d.newOwner.getIdentifier() == o.getIdentifier() || d.newOwner.getIdentifier() === '4001')
+    action: ALLOW
+}
+
+rule Ownercanseetheirself {
+  description: "owner can see and update their own record only"
+  participant(t): "org.vetchain.network.Owner"
+  operation: CREATE,READ, UPDATE
+  resource(v): "org.vetchain.network.Owner"
+  condition: (v.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+
+rule OwnercanseeLaw {
+  description: "owner can see and update their own record only"
+  participant: "org.vetchain.network.Owner"
+  operation: READ
+  resource: "org.vetchain.network.Law"
+  action: ALLOW
+}
+
+rule OwnercanseeVet {
+  description: "owner can see and update their own record only"
+  participant: "org.vetchain.network.Owner"
+  operation: ALL
+  resource: "org.vetchain.network.Vet"
+  //condition: o.getIdentifier()
+  action: ALLOW
+}
+
+rule OwnerCanUseInsurance {
+  description: "owner canApply insurance"
+   participant(o): "org.vetchain.network.Owner"
+    operation: ALL
+    resource(d): "org.vetchain.network.DogIsInsured"
+  	transaction: "org.vetchain.network.DogIsInsured"
+  	condition: (o.owner.getIdentifier() == o.getIdentifier() & d.getIdentifier())
+  action: ALLOW
+}
+
+rule OwnercanseeInsurance {
+  description: "owner can see and update their own record only"
+  participant: "org.vetchain.network.Owner"
+  operation: READ
+  resource: "org.vetchain.network.Insurance"
+  action: ALLOW
+}
+
+rule Vet{
+    description: "Vet CREW DOG"
+    participant: "org.vetchain.network.Vet"
+    operation: READ,UPDATE
+    resource: "org.vetchain.network.*"
+  	action: ALLOW
+}
+rule SystemACL {
+    description: "System ACL to permit all access"
+    participant: "org.hyperledger.composer.system.Participant"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
+
+rule NetworkAdminUser {
+    description: "Grant business network administrators full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+rule Lawenforcementcanperformanyactions {
+   	description: "Allow Law to see anything"
+    participant: "org.vetchain.network.Law"
+    operation: ALL
+    resource: "org.vetchain.network.*"
+  	action: ALLOW
+}
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
