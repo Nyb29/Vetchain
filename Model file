@@ -1,0 +1,110 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace org.vetchain.network
+
+asset Dog identified by dog{
+  o String dog
+  o String description
+  o String[]  ListVaccinationCompleted optional
+  o String MicrochipId optional 
+  o DateTime Vaccinedate optional
+  o DateTime Mchipdate optional
+  o Boolean isLost optional
+  o Boolean isDead optional
+  o DateTime dateOfDeath optional
+  o DateTime LostDate optional
+  o Boolean isInsured optional
+  o DateTime InsuranceDate optional
+  --> Owner owner
+}
+participant Owner identified by OwnerId {
+  o String OwnerId
+  o String FirstName
+  o String LastName
+  o String Address
+  o DateTime DOB
+  o Boolean isDead optional
+  o DateTime DayOfDeath optional
+}
+
+ participant Vet identified by VetId {
+  o String VetId
+  o String Clinic
+  o String Address
+  o String[] listOfVaccines
+ 
+}
+participant Law identified by LawId {
+  o String LawId
+  o String Station
+  o String Address
+  
+}
+participant Insurance identified by InsuranceId {
+
+  o String InsuranceId
+  o String branch
+  o String Address
+}
+
+transaction init{}
+
+
+transaction Own {
+  --> Dog dog
+  --> Owner newOwner
+  
+}
+
+transaction Registrationofownership {
+  --> Dog dog
+  --> Owner owner
+  
+}
+
+transaction getVaccination{
+ --> Dog dog
+ --> Vet vet
+}
+
+
+transaction DogIsInsured{
+ -->Dog dog 
+ -->Insurance dInsurance
+}
+
+
+transaction isLost{
+ -->Dog dog 
+ -->Law LawOffice
+}
+
+transaction isFound{
+ -->Dog dog 
+ -->Law LawOffice
+}
+
+transaction dogIsDead{
+-->Dog dog 
+--> Vet VetClinic
+}
+
+transaction OwnerIsDeath{
+--> Owner owner
+}
+
+transaction queryOwners{
+  -->Owner owner
+}
