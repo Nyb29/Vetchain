@@ -1,0 +1,8 @@
+/**
+ * New query file
+ */
+
+query Owners{
+  description:"select the owners"
+  statement:  SELECT org.vetchain.network.Owner WHERE (OwnerId == _$oID)
+}
